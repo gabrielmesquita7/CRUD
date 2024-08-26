@@ -11,29 +11,86 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FiretostoreService firestoreService = FiretostoreService();
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
 
-  final TextEditingController noteController = TextEditingController();
+  void openNoteBox(
+      {String? docID, String? currentTitle, String? currentDescription}) {
+    if (docID != null) {
+      titleController.text = currentTitle ?? '';
+      descriptionController.text = currentDescription ?? '';
+    }
 
-  void openNoteBox({String? docID}) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        content: TextField(
-          controller: noteController,
+        backgroundColor: Colors.deepPurple[50],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              style: TextStyle(
+                color: Colors.deepPurple,
+                fontSize: 18,
+                fontFamily: 'Roboto',
+                fontWeight: FontWeight.bold,
+              ),
+              decoration: InputDecoration(
+                hintText: "Título",
+                hintStyle: TextStyle(color: Colors.deepPurple[200]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: descriptionController,
+              style: TextStyle(
+                color: Colors.deepPurple,
+                fontSize: 16,
+                fontFamily: 'Roboto',
+              ),
+              decoration: InputDecoration(
+                hintText: "Descrição",
+                hintStyle: TextStyle(color: Colors.deepPurple[200]),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
         ),
         actions: [
           ElevatedButton(
-              onPressed: () {
-                if (docID == null) {
-                  firestoreService.addNote(noteController.text);
-                } else {
-                  firestoreService.updateNote(noteController.text, docID);
-                }
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: () {
+              if (docID == null) {
+                firestoreService.addNote(
+                    titleController.text, descriptionController.text);
+              } else {
+                firestoreService.updateNote(
+                    titleController.text, descriptionController.text, docID);
+              }
 
-                noteController.clear();
-                Navigator.pop(context);
-              },
-              child: Text("Salvar")),
+              titleController.clear();
+              descriptionController.clear();
+              Navigator.pop(context);
+            },
+            child: const Text(
+              "Salvar",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
     );
@@ -43,45 +100,126 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Notas"),
+        title: const Center(
+          child: Text(
+            "Notas",
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.deepPurple,
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: openNoteBox,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.deepPurple,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: StreamBuilder<QuerySnapshot>(
-          stream: firestoreService.getNotes(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              List noteslist = snapshot.data!.docs;
-              return ListView.builder(
-                  itemCount: noteslist.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot document = noteslist[index];
-                    String docID = document.id;
-                    Map<String, dynamic> data =
-                        document.data() as Map<String, dynamic>;
-                    String noteText = data['note'];
+        stream: firestoreService.getNotes(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+            List<DocumentSnapshot> noteslist = snapshot.data!.docs;
+            return ListView.builder(
+              itemCount: noteslist.length,
+              itemBuilder: (context, index) {
+                DocumentSnapshot document = noteslist[index];
+                String docID = document.id;
+                Map<String, dynamic> data =
+                    document.data() as Map<String, dynamic>;
+                String noteTitle = data['title'];
+                String noteDescription = data['description'];
 
-                    return ListTile(
-                        title: Text(noteText),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                                onPressed: () => openNoteBox(docID: docID),
-                                icon: const Icon(Icons.settings)),
-                            IconButton(
-                                onPressed: () =>
-                                    firestoreService.deleteNote(docID),
-                                icon: const Icon(Icons.delete)),
-                          ],
-                        ));
-                  });
-            } else {
-              return const Text("Sem notas");
-            }
-          }),
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 16,
+                      ),
+                      title: Text(
+                        noteTitle,
+                        style: TextStyle(
+                          color: Colors.deepPurple[900],
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        noteDescription,
+                        style: TextStyle(
+                          color: Colors.deepPurple[700],
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () => openNoteBox(
+                                docID: docID,
+                                currentTitle: noteTitle,
+                                currentDescription: noteDescription),
+                            icon: const Icon(
+                              Icons.edit,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => firestoreService.deleteNote(docID),
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text(
+                "Erro ao carregar notas",
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          } else {
+            return const Center(
+              child: Text(
+                "Sem notas",
+                style: TextStyle(
+                  color: Colors.deepPurple,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 }

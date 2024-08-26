@@ -10,4 +10,24 @@ class FiretostoreService {
       'timestamp': Timestamp.now(),
     });
   }
+
+  //READ
+  Stream<QuerySnapshot> getNotes() {
+    final notesStream =
+        notes.orderBy('timestamp', descending: true).snapshots();
+    return notesStream;
+  }
+
+  //UPDATE
+  Future<void> updateNote(String newnote, String docID) {
+    return notes.doc(docID).update({
+      'note': newnote,
+      'timestamp': Timestamp.now(),
+    });
+  }
+
+  //DELETE
+  Future<void> deleteNote(String docID) {
+    return notes.doc(docID).delete();
+  }
 }

@@ -90,6 +90,32 @@ lib/
 
 ![image](https://github.com/user-attachments/assets/65be7b5b-88f1-48ac-9452-c2772f4f48d0)
 
+## Adicionando os outros métodos:
+
+### 1. READ
+#### 1.1 Código em *home_page.dart*
+
+![image](https://github.com/user-attachments/assets/36a757d1-6d2a-42ad-9c88-88c4bda5fd07)
+
+#### 1.2 Código em *firestore.dart*
+
+![1](https://github.com/user-attachments/assets/6bde81fc-69ab-40ff-90a6-2a59354d6d1b)
+### 2. UPDATE
+#### 2.1 Código em *home_page.dart*
+
+![image](https://github.com/user-attachments/assets/f55fa4e5-34bf-4fbf-b480-ddd1d812b175)
+
+#### 2.2 Código em *firestore.dart*
+
+![image](https://github.com/user-attachments/assets/0caa8418-ccea-432c-8b39-ad7f6941695f)
+### 3. DELETE
+#### 3.1 Código em *home_page.dart*
+
+![image](https://github.com/user-attachments/assets/c00bc91c-2d91-4f1b-89bb-eba1279b0291)
+
+#### 3.2 Código em *firestore.dart*
+
+![image](https://github.com/user-attachments/assets/524a24a5-d93a-4f2b-8352-19422c4cb64e)
 
 ## Observação:
 
